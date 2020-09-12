@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+<head>
+    <title>Noah-Robert</title>
+
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+      
+    <link rel="shortcut icon" href="icon/favicon.ico">
+  
+      <link rel="stylesheet" type="text/css" href="/css/notestyle.css" />
+  
+      <script type="text/javascript" src="/js/script.js"></script>
+  </head>
+  
+  <body class="home-template">
+</head>
+
+<body class="post-template tag-javascript tag-programming">
+
+	<nav id="menu">
+        <a class="close-button">Close</a>
+        <div class="nav-wrapper">
+            <p class="nav-label">Menu</p>
+            <ul>
+          <li class="nav-home active" role="presentation"><a href="index.html">Home</a></li>
+          <li class="nav-home active" role="presentation"><a href="notes.html">Notes</a></li>
+          <li class="nav-home active" role="presentation"><a href="videos.html">Videos</a></li>
+          <li class="nav-home active" role="presentation"><a href="resume.pdf">Resume</a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+
+	<section id="wrapper">
+		<a class="hidden-close"></a>
+		
+
+<div class="progress-container">
+	<span class="progress-bar"></span>
+</div>
+
+<header id="post-header">
+	<div class="inner">
+		<nav id="navigation">
+			<span id="home-button" class="nav-button">
+				<a class="home-button" href="../index.html" title="Home"><i class="ic ic-arrow-left"></i> Home</a>
+			</span>
+			<span id="menu-button" class="nav-button">
+				<a class="menu-button"><i class="ic ic-menu"></i> Menu</a>
+			</span>
+		</nav>
+		<h1 class="post-title">How to deploy Suricata in AWS Utizling AWS Traffic Mirroring</h1>
+		<span class="post-meta">July 29 2020</span>
+		
+	</div>
+</header>
+
+<main class="content" role="main">
+	<article class="post tag-javascript tag-programming">
+		<div class="inner">
+
+			<section class="post-content">
+			
+<p></p>Traffic Mirroring allows us to copy network traffic from an Elastic Network Interface (ENI) of an Amazon EC2 instance to a specified target. This will allow us to monitor the traffic out-of-band using a security monitoring tool like Suricata. To start we'll deploy our source and target EC2 instances, install Suricata on our target, and then set up our traffic mirroring.</p>
+
+
+<h3 id="solution">Walkthrough</h3>
+
+<p>Let's start by deploying two EC2 instances within our VPC. For our source instance, we'll go with a free-tier Amazon Linux 2 AMI and a t3.mirco instance type. Note that traffic mirroring is only enabled for nitro enabled instance - a more detailed list can be found <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances"target="_blank">here. </a>We'll choose the default settings for most of the options, and I'll detail the few changes we'll want below:</p>
+
+<p>1. Make sure that you instance is in a public subnet. If you're utilizing the default VPC then by default newly created instances will be placed in this public subnet. If you have created a new VPC you'll need to confirm this instance is in one of the public subnets.</p>
+
+<p>2. For our user data, I'm going to deploy a simple web server just to help us verify our instance is up and publily accesible. You can paste the code below within the user data section on the 'Configure Instance Details' step of the EC2 creation process.</p>
+
+
+<pre><code> 
+    #!/bin/bash
+    sudo su
+    yum install -y httpd
+    systemctl start httpd
+    echo "hello!" > /var/www/html/index.html
+    systemctl restart httpd
+</code></pre>
+
+<p>3. In our security group creation step, we're going to allow all traffic from a source of anywhere. While this is not best practice and should never be utilized in a real-world situation, we'll configure the instance like this for now to make sure we get ample logs within Suricata.</p>
+
+
+<p>Now we'll create our target EC2 instance. For this, we'll choose a slighly more powerfull instance type of t2.medium to ensure Suricata has enough procesing power. Note that this is right around the minimum CPU/Memory configuration that will sucesfully run Suricata. I'm also utilizing a CentOS 7 AMI which can be found <a href="http://aws.amazon.com/marketplace/pp/B00O7WM7QW?ref=cns_srchrow" target="_blank">here.</a> We'll go with the default settings again for most of the options, along with the user data script below to install suricata on a CentOS 7 server. For this security group we'll want to restrict access to TCP 22 (ssh) from only our IP. This will allow us to configure Suricata but restrict all other access.</p>
+
+
+<pre><code> 
+    #!/bin/bash
+    sudo su
+    yum install -y epel-release
+    yum install -y gcc libpcap-devel pcre-devel libyaml-devel file-devel zlib-devel jansson-devel nss-devel libcap-ng-devel libnet-devel tar make libnetfilter_queue-devel lua-devel PyYAML libmaxminddb-devel rustc cargo lz4-devel
+    cd /etc
+    yum install -y wget
+    wget https://openinfosecfoundation.org/download/suricata-4.1.8.tar.gz
+    tar -xvzf suricata-4.1.8.tar.gz
+    cd suricata-4.1.8
+    ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-nfqueue --enable-lua
+    make
+    make install-full
+    ldconfig
+    suricata-update -f -v --local=/etc/suricata/local.rules
+</code></pre>
+
+<p>Once that instance is running let's confirm we can succefully SSH to it and that Suricata was isntalled with our user data script. Below we see the appropriate /etc/suricata and /var/log/suricata directories have been created.</p>
+<img src="images/suricata_1.png" alt="directories">
+
+<p>Configuring Suricata itself will take a bit of tweaking based on your VPC and current set up. I highly reccomend following the basic setup guide <a href="https://redmine.openinfosecfoundation.org/projects/suricata/wiki/Basic_Setup"target="_blank">here.</a> This will detail a number of variables to set based on the CIDR range of your VPC and steps on how to start Suricata itself (suricata -c /etc/suricata/suricata.yaml -i eth0). Once completed we can confirm this by running 'ps aux | grep suricata'.</p>
+
+<img src="images/suricata_2.png" alt="ps aux">
+
+<p>To be continued</p>
+
+			</section>
+
+
+
+			
+
+
+		</div>
+	</article>
+</main>
+
+
+		<div id="body-class" style="display: none;" class="post-template tag-javascript tag-programming"></div>
+
+		<footer id="footer">
+			<div class="inner">
+				<section class="credits">
+					<span class="credits-theme">Theme <a href="https://github.com/zutrinken/attila">Attila</a> by zutrinken</a></span>
+				</section>
+			</div>
+		</footer>
+	</section>
+
+
+
+</body>
+
+
+</html>

@@ -1,0 +1,1006 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+<head>
+    <title>Noah-Robert</title>
+
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+      
+    <link rel="shortcut icon" href="icon/favicon.ico">
+  
+      <link rel="stylesheet" type="text/css" href="/css/notestyle.css" />
+  
+      <script type="text/javascript" src="/js/script.js"></script>
+  </head>
+  
+  <body class="home-template">
+</head>
+
+<body class="post-template tag-javascript tag-programming">
+
+	<nav id="menu">
+        <a class="close-button">Close</a>
+        <div class="nav-wrapper">
+            <p class="nav-label">Menu</p>
+            <ul>
+          <li class="nav-home active" role="presentation"><a href="index.html">Home</a></li>
+          <li class="nav-home active" role="presentation"><a href="notes.html">Notes</a></li>
+          <li class="nav-home active" role="presentation"><a href="videos.html">Videos</a></li>
+          <li class="nav-home active" role="presentation"><a href="resume.pdf">Resume</a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+
+	<section id="wrapper">
+		<a class="hidden-close"></a>
+		
+
+<div class="progress-container">
+	<span class="progress-bar"></span>
+</div>
+
+
+<header id="post-header">
+	<div class="inner">
+		<nav id="navigation">
+			<span id="home-button" class="nav-button">
+				<a class="home-button" href="../index.html" title="Home"><i class="ic ic-arrow-left"></i> Home</a>
+			</span>
+			<span id="menu-button" class="nav-button">
+				<a class="menu-button"><i class="ic ic-menu"></i> Menu</a>
+			</span>
+		</nav>
+		<h1 class="post-title">SCS-C01 - Security Specialty - Zeal Vora Course</h1>
+		
+		
+	</div>
+</header>
+
+<main class="content" role="main">
+	<article class="post tag-javascript tag-programming">
+		<div class="inner">
+
+			<section class="post-content">
+			
+                <h3 id="solution">Incident Response</h3>			
+<p> </p>
+                <p><strong>AWS Abuse Notice</strong></p>
+                <ul>
+
+                    <li>AWS will notify customers if they believe their infrastructure/resource is involved in potential abusive activities (spam, DDoS, etc.)</li>
+                    <li>These abuse complaints can be filled by other customers or indivudals who are being targetted by a resource you own</li>
+                    <li>Notifying customer will provide the source IP and any logs detailing the abusive activites</li>
+                    <li>Preventative actions are vital to thwart this activity. This could include a number of controls or activities such as server hardening, FIM, patch management, vulnerability scanning, proper WAF configuration, etc.</li>
+                    <li>Further investigation and triage activites are required once you receive an abuse complaint</li>
+        
+            
+                </ul>
+                <p><strong>GuardDuty</strong></p>
+                <ul>
+
+                    <li>Threath intelligence service provided by AWS that combs through the logs from a number of sources (CLoudTrail Events, VPC Flow Logs, and DNS Logs) to discover malicious activity within your AWS accounts. This could be excessive SSH login failures, DNS requests to a known CnC server, Bitcoin miner detected, etc. </li>
+                    <li>Uses a combination of maching learning, anomaly detection, and integrated threat intelligence to identify these threats. Extremely easy to setup.</li>
+                    <li>Will have a severity of high/medium/low along with a large amount of metadata (source and destination IP/port, date/time, associated IAM roles/groups, threat category, etc.</li>
+                    <li>Will only monitor Route53 DNS logs - not logs from an AD DNS server</li>
+                    <li>Does not take into account EC2 logs</li>
+                    <li>To whitelist an approved server, you can add a trusted IP list (IP of your vulnerability management server for example)</li>
+                    <li>Can add in known malicious IP's into a threat list</li>
+                    <li>Arhive a specific alert to mark as fixed/remediated</li>
+                    <li>You can write a rule to supress certain findings. This can be based on the type of finding (SSH brute force, Root cred usage, etc.)</li>
+                    <li>Active Findings Types - <a href="https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html"></a></li>
+                    <li>Ideally, all member accounts would send their logs to a central master account to have a single dashboard to view threats across your entire environment</li>
+                
+                </ul>
+
+
+                <p><strong>IR Terminology</strong></p>
+
+
+                <ul>
+
+                    <li>An incident an is an event that poses a threat to your computer or information systems</li>
+                    <li>IR involves an organized approach to respond to and remediate the aftermath of a security events against your ogranization. You want to limit damage and costs, as well as work to prevent this action from occuring in the future (blocking a malicious IP)</li>
+                    <li>A number of events include: brute force attacks, FIM changes to critical files, web based attacks, sending traffic to unexpected locations, tracking user actions within your environment, exteranl vulnerability scans (IDS/IPS solution)</li>
+                    <li>Directly related to our security monitoring tools and procedures</li>
+                    
+                    <p><strong>Use Cases</strong></p>
+                    <p>Exposed AWS access and secret keys</p>
+                    <li>Determine the access associated with those keys. Read/Write access to prod vs read access to public S3 bucket</li>
+                    <li>Invalidate the credentials. Can disable or delete the credentials. It is advised to disable them so you can re-enable if removing them breaks the application</li>
+                    <li>Invalidate any temp credentials issued with the exposed keys. Expires eventually - max of 36 hours. Just disabling/deleting the base access keys does not disable our temp access keys. Ideally, we would add an explicit deny policy for the base user to prevent access to everything</li>
+                    <li>Restore access with new credentials. Create a new key pair and assign to the asociated principal. Ideally, we would use IAM roles/federation vs long-term creds</li>
+                    <li>Review your AWS account. Review all CloudTrail/S3 logs to determine what actions might have been taken against your account. Confirm additional users/access keys were not created</li>
+
+                    <p>Compromised EC2 instance</p>
+                    <li>Lock the instance Down. Isolate the instance so it cannot communicate to other internal hosts or the internet. Only accesible from the machine that will be a jump point for forensic purposes. Process can be automated to remove all but one specific security groups</li>
+                    <li>Take an EBS snapshot. Ensures all files/scripts are backed up for forensic purposes</li>
+                    <li>Memory Dump. Ensures that all processes running are dumped for forensics</li>
+                    <li>Forensic Analysis is performed and RCA can be completed</li>
+                    <li>Terminate the instance</li>
+                
+
+
+                </ul>
+
+
+                <p><strong>IR in the Cloud</strong></p>
+
+                <ul>
+
+                <li>Many AWS tools; Config, CouldTrail, CloudWatch, and GuardDuty, help greatly in reducing the time, complexity, and cost of IR in the cloud </li>
+                <li>Preparation - ensure logging (CloudTrail, VPC flow logs, etc.) is configured and AWS orgs are used to seperate accounts and reduce the blast surface</li>
+                <li>Detection - use behaviourla based rules to identify odd behavior and potential threats (logging in at off hours or excessive failures from another country)</li>
+                <li>Containment - can use predefined scripts to automatically restrict access to an EC2 instance. Best to automate this step</li>
+                <li>Investigation - using CloudWatch logs to determine what happened within the server. Use Config to see what changed on the server level (security group changed right before an attack)</li>
+                <li>Recovery - use pre-built ami to quickly recover a new application server or cloudformation to deploy an entirely new stack</li>
+
+
+            </ul>
+
+			</section>
+
+            <section class="post-content">
+			
+                <h3 id="solution">Logging and Monitoring</h3>			
+<p> </p>
+                <p><strong>AWS Inspector</strong></p>
+
+                <ul>
+                <li>Vulnerability scanner that will scan your assets for vulnerabilites/misconfigurations. Utilizes an agent installed on the server in order to scan</li>
+                <li>This is an EC2 vulnerability scan - not for ELD, CloudFront, etc.</li>
+                <li>CVE, CIS Benchmark (server hardening rules), security best practices, and network reachability (does not require an agent - external perspective</li>
+            
+
+            </ul>
+
+            <p><strong>Security Hub</strong></p>
+
+            <ul>
+            <li>Provides a comprehensive view of your high-priority security alerts and complaince status/posture</li>
+            <li>Ingests logs from GuardDuty, Inspector, Firewall Manager, Macie, etc.</li>
+            <li>Can run automated checks (CIS AWS Foundation and PCI DSS) to determine if these rules are being followed within your AWS account</li>
+            <li>Integrations with a number of third-party services (alertlogic, rapid7, tenable, splunk, sumo logic, etc.)</li>
+        
+        
+        </ul>
+
+
+        <p><strong>WAF</strong></p>
+
+        <ul>
+        <li>Firewall that operates at layer 7 (http based communicated) vs typical layer 3/4 FW. Primarily works based on OWASP top 10 alerts/signatures</li>
+        <li>Rule statement - basic characteristics to analyze web requests. For example, block all requests from China or block requests that have a URI path of /admin</li>
+        <li>Rules - can combine mutiple rule statements into rules (using and, or, not). Regular and rate-based rules. Regular: block from a specific IP if it's a SQL attack. Rate-based: block from a specific IP if greater than 100 requests in 1 minute</li>
+        <li>Web ACL - contains the rules, rule statements, and the overall configuration</li>
+        <li>Association - what entity is it associated with (ALB, CloudFront, or API Gateway) - cannot assign to EC2 instance directly</li>
+        <li>1500 WCU's max - the more rules the more chance to have an impact on performance</li>
+        <li>You can create rule groups that contain a number of customer rules and apply that to multiple Web ACL's</li>
+        <li>Rule priority of zero has precedence and so forth</li>
+    </ul>
+
+    <p><strong>Systems Manager</strong></p>
+
+    <ul>
+        <li>Services that allow you to have better visibility and control of your infrastructure</li>
+        <li>SSM agent installed on the EC2 instances in order for some services (run command, sessions manager) to function  - you can perform actions and gather results from this agent</li>
+        <li>SSM agent can be installed on EC2 instances, on-prem, or VM's - installed by default on newer AWS Amazon Linux AMI's. Must have the appropriate instance role in place</li>
+        
+        <p>Sessions Manager</p>
+        
+        <li>Allows us to connect to the instances though a browser-based shell or the AWS CLI. Removes the need for a bastion host (for private hosts) or opening of port 22 (for ssh)</li>
+        <li>Can send the session output (and commands ran) to S3 or CloudWatch logs</li>
+
+        <p>Run Command</p>
+        <li>Allows us to run specific commands on instancs with the SSM agent installed</li>
+        <li>Can run the same commands across a large number of instances (install software, clear IP tables, etc.)</li>
+        <li>Built in command documents for Ansible, Docker, running shell scripts, Windows updates, and many more</li>
+
+
+        <p>Patch Manager</p>
+        <li>Helps to automate the process of patching managed instances. Can scan for missing patches and apply the patches automatically</li>
+        <li>Patch baseline - determines the list of missing pathes that need be installed. Defines what packages are approved for upgrade/installation on your devices. Can exclude the Kernel patch for example (only in custom baselines)</li>
+        <li>Can do a 'scan only' or 'scan and install' which will apply the appropriate patches without review using the run command service</li>
+
+        <p>Parameter Store</p>
+        <li>Works to offload secrets from the application itself to a centralized store. Can include database strings, passwords, etc.</li>
+        <li>SecureString - encrypts your sensitive data with the use of KMS. If you used 'String', you could still read the value in the console/CLI</li>
+        <li>SecureString required --with-decryption in order to see the true value in the CLI (if you had the proper permission</li>
+
+    </ul>
+
+
+    <p><strong>CloudWatch Logs</strong></p>
+
+    <ul>
+    <li>Old approach - need to grant direct access to the server to review logs. If the server is terminated than all logs are lost. No way to setup alarms on certain criteria or filters</li>
+    <li>Acts as a centralized, highly-available, log server for all individual systems/services where data is stored, monitored, and accessed</li>
+    <li>On EC2 - must create an IAM role with the appropriate policy, install the agent to gather and push logs to CloudWatch, modify the config file to define what you want to push (/var/log/messages for example)</li>
+    </ul>
+    <p><strong>CloudWatch Events</strong></p>
+
+    <ul>
+    <li>Allows you to respond to changes in your AWS environment in real time. For example, if an instance is terminated we can deregister it from a centralized nonitoring server, AV server, etc.</li>
+    <li>Can create rules based on even patterns (instance start/stop) or a set schedule (every night as 9pm) and the target can be an SNS topic, lambda function, etc.</li>
+
+
+    </ul>
+
+
+    <p><strong>CloudTrail</strong></p>
+
+    <ul>
+    <li>Records all activites (api calls) that happen within your infrastrcture and servers</li>
+    <li>For example, you can track what all actions a user performed on a certain date - modified SG, launched an EC2 instance, etc. </li>
+    <li>Can also record all S3/Lamba API calls by selectig those options</li>
+    <li>Logs are stored in an S3 bucket that we specify and only new events will be stored, not previous events</li>
+    <li>These logs are extremely important in the case of a breach and we need to be able to determine if the logs have been modified or deleted. Uses SHA-256 for this</li>
+    <li>Log file validation is an option we can set when creating a new trail. A CloudTrail-Digest file will be used to confirm the files have not been modified/deleted. Uses public/private key to validate these digest files which are delivered every hour</li>
+
+</ul>
+
+
+    <p><strong>AWS Config</strong></p>
+
+    <ul>
+    <li>Keeps track of the current inventory and tracks all of our infrastructure/service changes</li>
+    <li>Does not support all services and is tied to a specific region (not a global service)</li>
+    <li>Config timeline - shows any changes made to a specific resource. Also defines all of the relationships of that resource (SG assigned to an EC2 instance and a specific ENI)</li>
+    <li>Config will pull all the CloudTrail data and allow us to easily monitor changes based on that</li>
+    <li>Makes it easier to determine what exactly changed to cause an outage/downtime and easily revert that change</li>
+    <li>Can monitor and auto-remediate for best security practices as well - versioning enabled on S3, root MFA enabled, no open port 22, no unsed EIP's, etc. 159 managed rules</li>
+
+</ul>
+
+
+
+    <p><strong>Trusted Advisor</strong></p>
+
+    <ul>
+    <li>Analyzes our AWS environemnt and provides best practice recommendations in five categories (cost optimization, performance, security, fault tolerance, service limits)</li>
+    <li>Two types of checks - core checks (basic support plan) and full checks (business or enterprise support plan)</li>
+    <li>Can recieve weekly emails if you have a business or enterprise support license</li>
+    </ul>
+
+    <p><strong>Macie</strong></p>
+
+    <ul>
+    <li>Makes use of ML to identify and protect sensitive date (PII data, SSL private keys, database passwords) stored in AWS S3 from breaches, leaks, and unauthorized access</li>
+    <li>Macie can automatically detect and classify the data we upload and assign an appropriate business value to monitor for suspicious activity</li>
+    <li>For example, AWS credentials hardcoded into a site hosted in S3 or credit card data being stored in plain-text</li>
+    <li>Based on a number of Regex patterns and associated risk</li>
+    
+    </ul>
+
+
+
+    <p><strong>VPC Flow Logs</strong></p>
+
+    <ul>
+    <li>Allows us to see the inbound/outbound traffic from a particular interface in your VPC and determine if the SG is accepting or rejecting it</li>
+    <li>Requires the appropriate role to be able to create your flow logs and put the events</li>
+    <li>Fields include interface id, src/dest ip and port, protocol, packets, bytes, start/end, action (accept/reject), and status</li>
+    <li>Can be enabled at the interface, subnet, and VPC level. If you enabled at a higher level, it gets enabled in lower levels by default</li>
+
+    </ul>
+
+            </section>
+            
+            <section class="post-content">
+			
+                <h3 id="solution">Infrastructure Security</h3>			
+<p> </p>
+                <p><strong>Bastions</strong></p>
+
+                <ul>
+                <li>Acts as a jump box from public to private subnets (and associated EC2 instances)</li>
+                <li>Makes use of ssh-agent forwarding (-A) to act as a proxy without storing our private key on the bastion host - can keep it on our local machine</li>
+                <li>Security of the bastion host is vital. Remove unecessary packages (httpd, nginx, postfix), apply general server hardening (CIS Benchmarks), and never store private keys on the bastion themselves</li>
+
+                </ul>
+
+
+                <p><strong>VPC Peering</strong></p>
+
+                <ul>
+                <li>Network connection between two vpc's that enable instances within those seperate vpc's to communicate via private IP</li>
+                <li>Peering connection has to be accepted before routing can occur</li>
+                <li>Peering is possible between different regions</li>
+                <li>Does not act like a transit VPC. Just because VPC A can talk to VPC B and VPC C, does not mean VPC B and C can talk. Would require a seperate peering connection</li>
+                <li>CIDR blocks cannot overlap within VPC peers</li>
+
+                
+                </ul>
+
+
+                <p><strong>VPC Endpoints</strong></p>
+
+                <ul>
+                <li>Allows us to connect to AWS services/resources on the AWS private network vs traversing the public internet</li>
+                <li>Provides added security (does not require public instances and traffic stays within the AWS network) and reduces the latency</li>
+                <li>Two types - interface and gateway (S3 and DynamoDB) endpoints</li>
+                <li>Not possible to connect to from a VPN or Direct Connects (need gateway endpoint for this) - requires a route table entry that is only accesible from EC2 instances</li>
+                <li>ls for s3 buckets will work cross-region, but actually establishing a connection (put/delete) to a bucket in a different region will not work</li>
+                <li>Gateway ACL - allows us to restrict access to this VPC endpoint beyond the IAM role assigned to the instance. Can edit this policy to only allow certain actions (get/list/put) to a specific bucket for example</li>
+                <li>Interface endpoints - next gen VPC endpoints. Created within your VPC with a specific ENI and private IP. Access control through SG's vs ACL's</li>
+                <li>AWS will modify the dns entry of your vpc endpoint service to point to the ENI IP. No need to manage the route table ourselves</li>
+
+                </ul>
+
+
+                <p><strong>NACL</strong></p>
+
+                <ul>
+                <li>Stateless in nature and operate at the subnet level (vs instance level for SG). All subnets in a VPC must be associated with a NACL and by default non-custom NACL's allow full inbound/outbound connections</li>
+                <li>Allows us to block inbound access from a single IP vs SG which does not allow this level of granularity</li>
+                <li>A single NACL can be associated with many subnets in a VPC</li>
+                <li>The lower the rule #, the higher the priority</li>
+                <li>If you create a custom NACL then by default all inbound/outbound traffic will be denied</li>
+                <li>Statefull FW - if inbound connection is allowed from specific IP on a certain port, then it understands that outbound connection should also be allowed (even if there is no outbound rull allowing traffic) - stores the session state to achieve this - SG</li>
+                <li>Stateless FW - need to explicitly allow both inbound and outbound traffic. The client will typically choose the ephemeral port range (src port) - NACL</li>
+                <li>NACL - typically allow full outbound as detailing all ephemeral ports would be tedious</li>
+
+                </ul>
+
+
+                <p><strong>EBS</strong></p>
+
+                <ul>
+                <li>NAS based architecture. Data travels across a network connection from EC2 instance to EBS volume</li>
+                <li>It is recommended to enable encryption of your EBS volume to encrypt data in transit and at rest</li>
+                <li>To nullify data - can manually overwrite the data in EBS or AWS will wipe the data before reusing it for another customer/instance</li>
+                
+
+                </ul>
+
+
+                <p><strong>CDN/CloudFront</strong></p>
+
+                <ul>
+                <li>Solves challenges associated with web hosting - performance as you grow and security (DDoS)</li>
+                <li>Acts as a middle layer (reverse proxy) between clients and the web server. In here we can apply performance and security features (DDoS protection, WAF, caching, georestrictions, etc.)</li>
+                <li>If you are hosting an image that thousands of users are requesting, CDN's take advatnage of caching the file in edge locations to ensure future requests are served from the cache vs making thousands of the same request to the web server. This is great for performance</li>
+                <li>x-cache - miss from cloudfront - the image was not present in the CDN and was requested from the origin. Hit from cloudfront would indicate it's being cached by cloudfront</li>
+                <li>OAI - prevents direct access to the origin s3 bucket. Now the bucket will only accept connections from the CloudFront distribution using the OAI</li>
+                <li>OAI is configured in the bucket policy. Must also remove all public access to the bucket in order to fully secure</li>
+                <li>Sever name indication (SNI) - due to the increased use of virtual hosts, the server needs to be made aware of the specific site that is being requested so they can serve the correct SSL certificate. The client will now specify the server name in the initial client hello of the TLS handshake</li>
+                <li>SNI allows a single IP to host multiple sites/ssl certificates</li>
+
+                </ul>
+
+
+                <p><strong>CloudFront Signed URL's</strong></p>
+
+                <ul>
+                <li>A signed URL includes additional information, for example, an expiration date and time, that gives you more control over access to your content</li>
+                <li>Allows us to restrict access to certain private content by requiring the user to have a specific, signed url (or cookie) to gain access</li>
+                <li>Enabled via the Restrict Viewer Access setting when creating a distribution. Must define a trusted signer and generate a key pair within IAM - CloudFront key pairs</li>
+
+                </ul>
+
+
+                <p><strong>Shield/DDoS</strong></p>
+
+                <ul>
+                <li>Attack attempting to overflow the servers with requests, causing resource exhaustion and bringing the server down for legitimate end users</li>
+                <li>Managed DDoS service that protects aws resources from attacks. Two types - standard and advanced</li>
+                <li>Standard - protects against most common network and transport layer DDoS attacks</li>
+                <li>Advanced - provides a higher level of protection against larger and more sophisticated attacks. Alos provides near real-time visibility into potential attacks and 24x7 access to AWS DDoS response team. Paid service that requires a subscription and business/enterprise support</li>
+                <li>With advanced, AWS will return credits for infrastructure that has scaled up during any DDoS attack</li>
+                <li>Mitigate DDoS - be able and ready to scale (ELB/autoscaling), minimze the attack surface, know what is normal and abnormal, plan for attacks (block source IP, block based on origin country, block via WAF/NACL/SG level)</li>
+                
+                </ul>
+
+
+                <p><strong>EC2 Key Pair</strong></p>
+
+                <ul>
+                <li>When we create an instance, we specify a key pair for that instance and the public key is stored on the instance (~/.ssh/authorized_keys file)</li>
+                <li>If we delete a key pair that is assigned to a running EC2 instance, then we can still login as the public key is already stored on that instance</li>
+                <li>If we create a new instance from an old AMI, the old authorized keys file (public key) will be kept and the new key pair will be appended to the end</li>
+
+                
+                </ul>
+
+
+                <p><strong>EC2 Tenancy</strong></p>
+
+                <ul>
+                <li>Shared - your ec2 instance is launced on shared hardware where instances of other customers might reside as well. A little risk with this</li>
+                <li>Dedicated - instances are ran on hardware that is dedicated to you only. All instances running will belong to your aws account. If you start/stop the instance could get spun up on entirely new hardware (makes it difficult to manage licenses directly tied to the hardware)</li>
+                <li>Dedicated host - we have much more granular control over a phyiscal server to use our per-socket, per-core, or per-vm based software licenses. In this case, if we start/stop an instance, it will get spun up on the same physical server</li>
+
+                </ul>
+
+
+                <p><strong>Lambda@Edge</strong></p>
+
+                <ul>
+                <li>Allows us to run lambda functions to customize content that CloudFront delivers. Can be used to change requests and responses (at the 4 points below)</li>
+                <li>viewer request - after cloudfront recieves a request from a viewer. Executed on every request before the cache is checked. Modify URL's/cookies or perform authentication/authorization activities</li>
+                <li>origin request - before cloudfront forwards the request to the origin. Executed on cache miss / before a request is forwarded to the origin. Can dynamically set the origin based on request headers (route to s3 bucket or ec2 instance)</li>
+                <li>origin response - after cloudfront recieves the response from the origin. Executed on cache miss. Allows us to modify the response headers and replace various 4XX and 5XX errors from the origin (maintenance window page or 301 redirect)</li>
+                <li>viewer response - before cloundfront forwards the response to the viewer. Executed on all responses recieved from either the origin or cache. Allows us to edit every response back to the viewer, regardless if it was a cache hit/miss (modify the response headers before we cache the response)</li>
+                <li>Both origin types may not occur if there is a cache hit</li>
+                
+                </ul>
+
+
+                <p><strong>DNS Resolution in VPC</strong></p>
+
+                <ul>
+                <li>enablednshostnames - indicates whether instances with public IP's should get a corresponding public dns hostname - requires enablednssupport to be set to true as well</li>
+                <li>enablednssupport - indicates whether the dns resolution is supported. If this is set to false, the amazon provided dns server that resolves public dns hostnames is disabled</li>
+                <li>default nameserver is not enanbled (specified in the resolv.conf) if enablednssupport is set to false. Will need to use a different dns server (8.8.8.8)</li>
+                <li>Both true - instances with public IP's get a public dns hostname as well, and the amazon provided dns serer can rsolved amazon provided private dns hostnames</li>
+                <li>Both false - instances with public IP's do not get a public dns hostname and private dns hostnames cannot be resolved</li>
+
+                
+                </ul>
+
+                <p><strong>API Gateway</strong></p>
+
+                <ul>
+                <li>Amazon API Gateway is an AWS service for creating, publishing, maintaining, monitoring, and securing REST, HTTP, and WebSocket APIs at any scale. </li>
+                <li>When request submissions exceed the steady-state request rate and burst limits, API Gateway fails the limit-exceeding requests and returns 429 Too Many Requests error responses to the client.</li>
+                <li>You can enable API caching in Amazon API Gateway to cache your endpoint's responses. With caching, you can reduce the number of calls made to your endpoint and also improve the latency of requests to your API.</li>
+
+                </ul>
+
+            </section>
+            
+            <section class="post-content">
+			
+                <h3 id="solution">IAM</h3>			
+
+
+                <p><strong>AWS Organizations</strong></p>
+
+                <ul>
+                <li>Offers a centralized policy-based management (SCP) and consolidated billing for multiple AWS accounts</li>
+                <li>Service conrol policies (SCP) - allows you to set overall policy restrctions on child accounts (deny disable cloudtrail or deny access to s3 for example) from the master account</li>
+                <li>Consolidated billing - allows you to see a breakdown of costs by accounts within your organization</li>
+                <li>Even if you are a root user in the child account, the SCP will still take presedence in limiting your access</li>
+                <li>Organizational Unit (OU) - allows us to group AWS accounts into different groups based on their use to more easily assign SCP's</li>
+                <li>Root OU comes by default. From here you can create multiple OU's and assign accounts or additional OU's to those. SCP's can then be applied at the OU or AWS account level</li>
+
+                </ul>
+
+                <p><strong>IAM Policy Logic</strong></p>
+
+                <ul>
+                <li>Decision starts with an assumption that the request will be denied. If there is no attached policy, we will deny that access by default</li>
+                <li>Then, all of the attached policies will be evaluated to determine the appropriate action</li>
+                <li>An explicit deny will be checked</li>
+                <li>If no expliict deny and policy allows for the access, it will be allowed</li>
+                <li>An explicit deny policy will take precedence over an allow policy</li>
+
+                </ul>
+
+
+                <p><strong>Identity and Resource Based Policies</strong></p>
+
+                <ul>
+                <li>Identity policies are attached to an IAM user, group, or role. These define what an identity can do. For example, we can attach an IAM policy to a user that allows them read-only access to S3</li>
+                <li>Resource based policy are attached directly to a resource, like an s3 bucket policy, SQS queue, etc. With these we can specify who has access to the resource and what kind of actions they can perform</li>
+                <li>Identity and resource based policies are combined when evaluating access to perform an action. For example, if an identity policy allows read and write on s3 and resource allows list, read, and write, then we can perform all 3 actions</li>
+                <li>Unless there is an explicit deny in any of the policies, they will be evaluated together. You can have no identity policy but a resource policy that allows full access and the end result would be full access</li>
+
+                </ul>
+
+                <p><strong>IAM Policies</strong></p>
+
+                <ul>
+                <li>These allow us to define what level of permissions should be given to a particular aws resource (users, roles, services (s3, sqs, etc.)). Four parts - statement, effect, action, resource</li>
+                <li>The statement element is required. Can contain multiple individual statements enclosed by {}</li>
+                <li>The action element defines the list of actions that should be allowed or denied</li>
+                <li>Resource element defines the object that the statement covers. This can be an ARN or wildcard (*)</li>
+                <li>Effect element defines whether we are allowing or denying the action on the specified resource</li>
+                <pre><code>  
+                    {
+                        "Version": "2012-10-17",
+                        "Id": "BucketPolicy",
+                        "Statement": [
+                            {
+                                "Sid": "1",
+                                "Effect": "Allow",
+                                "Action": "s3:GetObject",
+                                "Resource": "arn:aws:s3:::noah-robert-bucket/*"
+                            }
+                        ]
+                    } 
+                        </code></pre>
+                </ul>
+
+                <p><strong>Delegation - Cross Acount Trust</strong></p>
+
+                <ul>
+                <li>Identity acount - create a user in one accont end establish a trust relationship between other accounts to allow them to access without signing in to a new account</li>
+                <li>For hybrid workload deployments, AWS Identity Services allow you to establish a single identity and access strategy across your on-premises environments and AWS</li>
+                <li>Requires a cross-account role in the second account that we will assume to in order to gain access. This allows a user in the first account to assume this role once the proper permissions are set</li>
+                <li>Must establish trust between the account that owns the role and the resources (trusting account) and the account that contains the users (trusted account). To do this, the administrator of the trusting account specifies the trusted account number as the Principal in the role's trust policy</li>
+                <li>To complete the configuration, the administrator of the trusted account must give specific groups or users in that account permission to switch to the role - below</li>
+                <pre><code>  
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": {
+                          "Effect": "Allow",
+                          "Action": "sts:AssumeRole",
+                          "Resource": "arn:aws:iam::ACCOUNT-ID-WITHOUT-HYPHENS:role/Test*"
+                        }
+                      } 
+                        </code></pre>
+                </ul>
+
+                <p><strong>External ID Delegation</strong></p>
+
+                <ul>
+                <li>Additional data that can be passed to the AssumeRole API of the STS</li>
+                <li>At times, you need to give a third party access to your AWS resources (delegate access). One important aspect of this scenario is the External ID, optional information that you can use in an IAM role trust policy to designate who can assume the role</li>
+                <li>This external ID must be provided when assuming this role via the CLI/SDK - not able to assume a role via the console that requires an External ID</li>
+            <code><pre>
+                {
+                    "Version": "2012-10-17",
+                    "Statement": {
+                      "Effect": "Allow",
+                      "Action": "sts:AssumeRole",
+                      "Principal": {"AWS": "Example Corp's AWS Account ID"},
+                      "Condition": {"StringEquals": {"sts:ExternalId": "12345"}}
+                    }
+                  }
+
+                </code></pre>
+                </ul>
+
+                <p><strong>EC2 Instance Meta-Data</strong></p>
+
+                <ul>
+                <li>Data about your instance (IP, instance type, hostname, etc.) that can be accessed within the instance itself (http://169.254.169.254/latest/meta-data/)</li>
+                <li>AWS can also push data to the instance meta-data service that the ec2 instance can then use (ec2 instance connect pushes a one time ssh public key to authenticate you and enable you to access via the browser)</li>
+                <li>Using iptables, you can block local access to the instance meta-data service on a per user basis</li>
+
+                </ul>
+
+                <p><strong>IAM Role</strong></p>
+
+                <ul>
+                <li>An IAM identity that you can create in your account that has specific permissions. An IAM role is similar to an IAM user, in that it is an AWS identity with permission policies that determine what the identity can and cannot do in AWS</li>
+                <li>Intended to be assumable by anyone who needs it. Also, a role does not have standard long-term credentials such as a password or access keys associated with it. Instead, when you assume a role, it provides you with temporary security credentials for your role session.</li>
+                <li>We will have a set of policies associated with the role (S3 read only, ec2 start instance)</li>
+                <li>With IAM roles we do not need to hardcode passwords or access keys in order to access AWS services (accessing data in S3 for example)</li>
+                <li>Many resources (ec2 instances, lambda functions) can assume these roles along with users</li>
+                <li>When we assign a role to an instance, AWS will push the temp credentials (access key, secret access key, and a token) to the ec2 instance meta-data and we can then retrive these temp credentials to further authenticate (/latest/meta-data/iam/security-credentials/IAM-ROLE-ASSOCIATED-WITH-INSTANCE)</li>
+
+
+                </ul>
+
+                <p><strong>IAM Version</strong></p>
+
+                <ul>
+                <li>This defines the version of the policy language and the overall rules sytnax can differ based on the version being used</li>
+                <li>2012-10-17 - current version of the policy element and this is the recommended version to define</li>
+                <li>2008-10-17 - ealier version of the policy element that shuold not be used any more. If no version element is included it will default to this</li>
+                <li>2012 has certain aspects that are not supported in the 2008 version. For example, using a variable of ${aws:username} is only allowed in the 2012 version</li>
+                <li>version element (2012-10-17 - specifies the language of the policy) != policy version (this is versioning of your policy to track changes and revert if needed)</li>
+
+                </ul>
+
+                <p><strong>IAM Policy Variable</strong></p>
+
+                <ul>
+                <li>${aws:username} - used when you don't know the exact value of a resource or condition when you're creating the policy</li>
+                <li>Advantage of a direct ARN - typically means we cannot reuse this policy and assign to other users/groups. The same permissions will not be allowed across the board</li>
+                <li>Advantage of using a policy variable - we can resuse this policy and attach it to as many users/groups as we want and the same permission will be allowed</li>
+                <li>Only work with the 2012 Policy Version</li>
+
+                </ul>
+
+                <p><strong>Principal/NotPrincipal</strong></p>
+
+                <ul>
+                <li>Used to define things like IAM users, IAM roles, federated users, AWS accounts/services, etc. that will be allowed or denied access to a resource</li>
+                <li>Cannot be used in identity based policies (inline policies attached to user/roles) more for s3 bucket or sqs queue policies (resource-based policies)</li>
+                <li>NotPrincipal combined with a deny action will explicitly deny the access to all principals EXCEPT for the ones specified</li>
+                <li>If you use the NotPrincipal with deny action, you will need to create an identity-based policy that explicitly allows access to that resource. Because in the resource-based policy we are not allowing any access, just denying</li>
+                <pre><code>  
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [{
+                            "Effect": "Deny",
+                            "NotPrincipal": {"AWS": [
+                                "arn:aws:iam::888913816489:user/Alice"
+                            ]},
+                            "Action": "s3:*",
+                            "Resource": [
+                                "arn:aws:s3:::BUCKETNAME",
+                                "arn:aws:s3:::BUCKETNAME/*"
+                            ]
+                        }]
+                    }
+                </code></pre>
+                <pre><code>  
+                    {
+                        "Version": "2012-10-17",
+                        "Id": "BucketPolicy",
+                        "Statement": [
+                            {
+                                "Sid": "2",
+                                "Effect": "Allow",
+                                "Principal": {
+                                "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ##############"
+                                },
+                                "Action": "s3:GetObject",
+                                "Resource": "arn:aws:s3:::noah-robert-bucket/*"
+                            }
+                        ]
+                    } 
+                </code></pre>
+                </ul>
+
+
+                <p><strong>IAM Conditional Element</strong></p>
+
+                <ul>
+                <li>Allow us to specifiy conditions for when a policy is in effect. For example, state that access to a resource is only allowed if the access date is before a specified date</li>
+                <li>Can specify access only from a certain IP, or limit access from a group of IP's. Can also have a condition requiring MFA to be enabled on the principal account attempting to access the resource</li>
+                <li>Operators include String, Numeric, Date/Time, Boolean, IP, ARN, etc.</li>
+                <code><pre>
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": {
+                            "Effect": "Allow",
+                            "Action": "*",
+                            "Resource": "*",
+                            "Condition": {
+                                "IpAddress": {
+                                    "aws:SourceIp": "121.121.121.121/32"
+                                }
+                            }
+                        }
+                    }
+                </pre></code>
+                </ul>
+                <p><strong>AWS Security Token Service (STS)</strong></p>
+
+                <ul>
+                <li>Service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users or for users that you authenticate (federated users)</li>
+                <li>When you assign an IAM role to an instance, in the background the instance meta-data will provide the temporary access key, secret access key, and session token to authenticate you and grant you the correct access</li>
+                <li>These credentials are short-term and expire after a specified duration. Because of this, key rotation is not needed for these creds vs standard access keys (/root/.aws/credentials)</li>
+                <li>STS allows us to perform the assumerole funtion from one account to a role in another (once the trust relationship is established)</li>
+                <li>The IAM user will still need to have their long-term creds stored on thier local workstation in order to perform the assumerole function - SSO would be an alternative that still uses STS to assume temp credentials</li>
+
+                </ul>
+
+                <p><strong>Federation</strong></p>
+
+                <ul>
+                <li>Identity federation is a system of trust between two parties for the purpose of authenticating users and conveying information needed to authorize their access to resources. In this system, an identity provider (IdP) is responsible for user authentication, and a service provider (SP), such as a service or an application, controls access to resources. </li>
+                <li>Can utilize LDAP to store all of your users, and use this data to authenticate to other services (AWS, HR, Jenkins, etc.)</li>
+                <li>Allows exteranl identities to have access in your AWS account without having an IAM user acount. They are only present in the external identities (Active Directory (corp IDP) - Facbook, Google, Cognito (Web IDP))</li>
+                <li>Identity Broker - an intermediary that connects the identity provider (AD) to the service provider (AWS). Trust is established between the broker and service provider</li>
+                <li>If user creds are valid, the broker will contact STS which will share the access key, secret key, session token, and duration. With all of this the user will then be able to login to the console/CLI based on permissions</li>
+
+
+                <img src="images/aws_fed_2.png" alt="AWS Federation" >
+
+                </ul>
+
+                <p><strong>SAML</strong></p>
+
+                <ul>
+                <li>SAML is a secure, XML based communication standard for relaying identity information across organizations</li>
+                <li>Standard that allows an identity provider (IdP) to authenticate users and pass identity and security information about them to a service provider (SP), typically an application or service. With SAML, you can enable a single sign-on experience for your users across many SAML-enabled applications and services</li>
+                <li>This single login can grant you access to a number of services/applications from one set of credentials</li>
+                <li>IDP will validate the users creds and return a security assertion as part of the response. The user can then do a POST of this security assertion data to the service provider, who will in turn grant temporary access to the user and redirect them to the management console. This requires trust between the IDP and SP</li>
+
+                </ul>
+
+                <p><strong>SSO</strong></p>
+
+                <ul>
+
+                    <li>AWS Single Sign-On (SSO) makes it easy to centrally manage access to multiple AWS accounts and business applications and provide users with single sign-on access to all their assigned accounts and applications from one place</li>
+                    <li>AWS CLI integration - users can authenticate via the CLI and will be able to perform CLI operations without have to add their keys to the ~/.aws/credentials file - aws sso login --profile foobar</li>
+                    <li>Must choose an identity source (AWS SSO, AD, external IDP) where you will administer your users and groups</li>
+                    <li>With AWS SSO you assign a user/group within your account to have access and use permission sets to set the associated policy/permissions</li>
+                    <li>AWS CLI Integration - must have AWS CLI version 2</li>
+
+                </ul>
+
+
+                <p><strong>Cognito</strong></p>
+
+                <ul>
+
+                    <li>Amazon Cognito lets you add user sign-up, sign-in, and access control to your web and mobile apps quickly and easily</li>
+                    <li>Provides authentication, authorization, and user management</li>
+                    <li>User pools - these take care of the entire authentication and authorization process. You can define the username/password requirements, MFA settings, and many other options</li>
+                    <li>Identity pool - provides the functionality of federation for users within your pools. Allows us to authorize users of the application to access various AWS services. This allows us to grant access to something like DynamoDB without hard coding any access keys</li>
+                    <li>The identity pool can take users authenticating via cognito user pool, facebook, twitter, SAML, etc. and federate them - giving them secure access to AWS services regardless of where they originally came from</li>
+                    <li>Identity pool interacts with STS to provide a tempoaray access key, secret key, and session token to the web application user, granting them access to AWS services </li>
+
+                    <img src="images/cognito.png" alt="Cognito Federation">
+                </ul>
+
+                <p><strong>AWS Directory Service</strong></p>
+
+                <ul>
+
+                    <li>AWS Managed Microsoft AD, enables your directory-aware workloads and AWS resources to use managed Active Directory in the AWS Cloud. AWS Managed Microsoft AD is built on actual Microsoft Active Directory and does not require you to synchronize or replicate data from your existing Active Directory to the cloud</li>
+                    <li>With this, AWS handles admin functions like HA, monitoring, backups, recovery, etc.</li>
+                    <li>AWS Managed Microsoft AD - powered by an actual Microsoft AD server in the cloud. Standard edition (less than 5000 users) and enterprise edition</li>
+                    <li>AD Connectory - proxy service that connects applications in the cloud to your exisitng on-prem Microsoft AD. This connector will forward sign-in reqests to your on-prem AD server for authentication of applications in the cloud</li>
+                    <li>Simple AD - Microsoft AD that is powered by Samba (basically a free version of AD). Support basic functions like user/group creation and memberships, joining a linux server, group policies, kerberos SSO, etc. but not some features like trust relationships, MFA, DNS dynamic updates, LDAPS, etc.</li>
+
+
+                </ul>
+
+                <p><strong>AD Trust</strong></p>
+
+                <ul>
+
+                    <li>In AWS, we can create a trust relationship for the IAM so that we can have cross-account IAM access via the assumerole STS function</li>
+                    <li>in AD, domain to domain communication can occur through a similar trust. This trust is a secure authentication channel between two entities</li>
+                    <li>AD Trust allows us to grant access to resources to users, groups, and computers across entities</li>
+                    <li>Trust can be one-way or two-way depending on the requirements</li>
+                    <li>If you want to migrate AD aware workloads/apps to the cloud, you can use AD trust to connect AWS managed AD to your existing on-prem AD. Users can then access AD aware applications in the cloud using their exisitng AD creds. No need to synchronize new users, groups, passwords</li>
+
+                    <img src="images/aws_ad.png" alt="aws_ad">
+                </ul>
+
+                <p><strong>S3 Bucket Policies</strong></p>
+
+                <ul>
+
+                    <li>One limitation with IAM is that it is usually restricted to the principals, such as user, roles, and groups within AWS</li>
+                    <li>When we look at access to S3, this needs to be much more granular as we are usually allowing access from external entities who don't exist as a principal in AWS. These are called bucket policies which are attached directly to the bucket</li>
+                    <li>By default, objects uploaded to S3 are not publicly accesible. If we want to grant full access or access from only a subset of IP's, we can do this within our bucket policy</li>
+                    <code><pre>
+                        {
+                            "Version": "2012-10-17",
+                            "Id": "S3BP",
+                            "Statement": [
+                              {
+                                "Sid": "Allow_IP",
+                                "Effect": "Allow",
+                                "Principal": "*",
+                                "Action": "s3:*",
+                                "Resource": "arn:aws:s3:::examplebuckets/*",
+                                "Condition": {
+                                   "IpAddress": {"aws:SourceIp": "121.121.121.0/24"}
+                                } 
+                              } 
+                            ]
+                          }
+                    </pre></code>
+                    <li>Cross account S3 access - all s3 buckets could exist in account A with all ec2 instances in account B. Would need to specifically allow this access to push backups from B -> A via our bucket policy</li>
+                    <li>Note the two resouce lines below - this grants us access to the s3 bucket itself (to perform an ls s3) and the contents of the bucket (to perform a copy of an object</li>
+                    <code><pre>
+                        {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Sid": "1",
+                                    "Effect": "Allow",
+                                    "Principal": {
+                                        "AWS": "arn:aws:iam::123456789098:root"
+                                    },
+                                    "Action": "s3:*",
+                                    "Resource": [
+                                        "arn:aws:s3:::examplebuckets",
+                                        "arn:aws:s3:::examplebuckets/*"
+                                    ]
+                                }
+                            ]
+                        }                        
+                    </pre></code>
+                </ul>
+                <p><strong>Canned ACL's - Bucket Policies</strong></p>
+
+                <ul>
+
+                    <li>All buckets and its objects have an ACL associated with them that S3 will check against when a request is made</li>
+                    <li>By default when we create a bucket/object, the resource owner has full control over the resource</li>
+                    <li>Canned ACL's - pre-defined ACL with a  set of permissions associated with them. This can be specified with the x-amz-acl header in the request</li>
+                    <li>Examples would be private, public-read, bucket-owner-full-control, etc.</li>
+                    <li>Any file we upload to a bucket that does not belong to our AWS account, we need to ensure the associated ACL has the bucket-owner-full-control setting so the bucket owner in the other account can acces as well</li>
+
+                </ul>
+
+                <p><strong>Presigned URL's</strong></p>
+
+                <ul>
+
+                    <li>All objects by default are private. Only the object owner has permission to access these objects. However, the object owner can optionally share objects with others by creating a presigned URL, using their own security credentials, to grant time-limited permission to download the objects</li>
+                    <li>A presigned URL gives you access to the object identified in the URL, provided that the creator of the presigned URL has permissions to access that object. That is, if you receive a presigned URL to upload an object, you can upload the object only if the creator of the presigned URL has the necessary permissions to upload that object</li>
+                    <li>Can be used to allow access to material that requires a valid subscription to access</li>
+                    <li>Allows a guest user to access an object without having to authenticate with AWS or even have an associated IAM user account</li>
+                    <li>When you create a presigned URL for your object, you must provide your security credentials, specify a bucket name, an object key, specify the HTTP method (GET to download the object) and expiration date and time. The presigned URLs are valid only for the specified duration</li>
+        
+
+                </ul>
+
+                <p><strong>S3 Versioning</strong></p>
+
+                <ul>
+
+                    <li>Versioning is a means of keeping multiple variants of an object in the same bucket. You can use versioning to preserve, retrieve, and restore every version of every object stored in your Amazon S3 bucket. With versioning, you can easily recover from both unintended user actions and application failures</li>
+                    <li>The versioning state applies to all (never some) of the objects in that bucket. The first time you enable a bucket for versioning, objects in it are thereafter always versioned and given a unique version ID</li>
+                    <li>When you delete a file, a deletion marker is created for the latest version, but all previous versions still exist and can be retrieved</li>
+                    <li>Once you enabled versioning, you can never fully disable it. You can only suspend it on a bucket level</li>
+                    <li>Objects stored in your bucket before you set the versioning state have a version ID of null. When you enable versioning, existing objects in your bucket do not change. What changes is how Amazon S3 handles the objects in future requests</li>
+                
+
+                </ul>
+
+                <p><strong>S3 Cross Region Replication</strong></p>
+
+                <ul>
+
+                    <li>Replication enables automatic, asynchronous copying of objects across Amazon S3 buckets. Buckets that are configured for object replication can be owned by the same AWS account or by different accounts. You can copy objects between different AWS Regions or within the same Region</li>
+                    <li>User CRR to meet compliance requirements, minimize latency of accessing objects, and increase your overall opertaional efficiency (allow compute clusters in different regions to analyze the same set of objects)</li>
+                    <li>Both the source and destination buckets must have versioning enabled</li>
+
+                    <img src="images/s3_crr_reqs.png" alt="s3_crr_reqs">
+                
+                </ul>
+
+
+
+                <p><strong>S3 Object Lock</strong></p>
+
+                <ul>
+
+                    <li>WORM - write once read many. Once the data is added, it cannot be modified or deleted (tampered with)</li>
+                    <li>Allows us to store objects using a write-once-read-many (WORM) model. You can use it to prevent an object from being deleted or overwritten for a fixed amount of time or indefinitely. Object Lock helps you meet regulatory requirements that require WORM storage, or simply add another layer of protection against object changes and deletion</li>
+                    <li>Retention mode: Governance - IAM accounts with specific permissions are able to remove the object lock from specified objects</li>
+                    <li>Retention mode: Compliance - the object lock cannot be removed, even by the root account</li>
+                    <li>A retention period specifies a fixed period of time during which an object remains locked. During this period, your object is WORM-protected and can't be overwritten or deleted</li>
+                    <li>A legal hold provides the same protection as a retention period, but it has no expiration date. Instead, a legal hold remains in place until you explicitly remove it. Legal holds are independent from retention periods</li>
+                    <li>Object locks only work in versioned buckets, and retention periods / legal holds apply to individual object versions</li>
+                </ul>
+
+                <p><strong>MFA API Access</strong></p>
+
+                <ul>
+
+                    <li>With IAM policies, you can specifiy which API operations a user is allowed to call</li>
+                    <li>For added security, we can requires MFA for certain API operations (ec2 terminate for example)</li>
+                    <li>Will need to login with the MFA code in order for the policy below to work</li>
+                    <li>Via the CLI you will not be able to perform the start/stop function without doing an sts get-session-token command first, which will grant you a new asscesskey/secretaccesskey after you authenticate with your token ID (from google authenticator for example)</li>
+                    <code><pre>
+                        {
+                            "Version": "2012-10-17",
+                            "Statement": [{
+                              "Effect": "Allow",
+                              "Action": [
+                                "ec2:StopInstances",
+                                "ec2:TerminateInstances"
+                              ],
+                              "Resource": ["*"],
+                              "Condition": {"Bool": {"aws:MultiFactorAuthPresent": "true"}}
+                            }]
+                          }   
+                    </pre></code>
+                </ul>
+
+                <p><strong>IAM Permissions Boundaries</strong></p>
+
+                <ul>
+
+                    <li>An advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity. An entity's permissions boundary allows it to perform only the actions that are allowed by both its identity-based policies and its permissions boundaries</li>
+                    <li>The permissions boundary for an IAM entity (user or role) sets the maximum permissions that the entity can have. This can change the <strong>effective permissions</strong> for that user or role. The effective permissions for an entity are the permissions that are granted by all the policies that affect the user or role</li>
+                    <li>When you use a policy to set the permissions boundary for a user, it limits the user's permissions but does not provide permissions on its own - this is granted through the permissions policies in IAM</li>
+                    <li>If my managed policy states I have admin access, but my permissions boundary only allows for S3 access, then all I will have access to is S3</li>
+                    <li>If we need mutiple or a more granular permissions boundary, you need to create your own. By default you can only attach one overall permissions boundary (S3FullAccess for example). Any explicit denial takes precedence</li>
+                    <li>The permissions for an entity (user/role) can be affected by identity-based and resource-based policies, permissions boundaries, SCP's, and session policies</li>
+                    <code><pre>
+                        {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:*",
+                                        "cloudwatch:*",
+                                        "ec2:*"
+                                    ],
+                                    "Resource": "*"
+                                }
+                            ]
+                        }
+                    </pre></code>
+                    <img src="images/iam_perm.png" alt="iam_perm">
+
+                </ul>
+
+                <p><strong>IAM/S3</strong></p>
+
+                <ul>
+
+                    <li>IAM policies are usually applied at a bucket/object level</li>
+                    <li>Bucket level: "arn:aws:s3:::demo"</li>
+                    <li>Object level: "arn:aws:s3:::demo/*"</li>
+                    <li>Bucket level policies do not automatically get pushed down to the object level. The policy below would allow us to list objects of a bucket, but not perform a copy on a specific object within the bucket</li> 
+                    <code><pre>
+                        {
+                            "Version": "2012-10-17",
+                            "Statement":
+                              {
+                                "Effect": "Allow",
+                                "Action": ["s3:*"],
+                                "Resource": ["arn:aws:s3:::test-bucket"]
+                              }
+                          }
+                    </pre></code>
+                    <li>Whereas the statement below would allow us to perform all actions on the bucket and objects within the bucket (copy, delete, download, etc.)</li>
+                    <code><pre>
+                        {
+                            "Version": "2012-10-17",
+                            "Statement": [{
+                                "Effect": "Allow",
+                                "Action": ["s3:*"],
+                                "Resource": ["arn:aws:s3:::test-bucket"]
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": ["s3:*"],
+                                "Resource": ["arn:aws:s3:::test-bucket/*"]
+                            }]
+                        }
+                    </pre></code>
+                    <li>And the below would be combination of a bucket and object level policy. This is a risk, as it would apply to any bucket that starts with the same name - <strong>should not be used</strong></li>                                
+                    <code><pre>
+                        {
+                            "Version": "2012-10-17",
+                            "Statement":
+                              {
+                                "Effect": "Allow",
+                                "Action": ["s3:*"],
+                                "Resource": ["arn:aws:s3:::test-bucket*"]
+                              }
+                          }
+                    </pre></code>      
+                </ul>
+
+
+
+            </section>
+            
+            <section class="post-content">
+			
+                <h3 id="solution">Data Protection</h3>			
+
+
+
+			</section>
+
+			
+
+
+		</div>
+	</article>
+</main>
+
+		<div id="body-class" style="display: none;" class="post-template tag-javascript tag-programming"></div>
+
+		<footer id="footer">
+			<div class="inner">
+				<section class="credits">
+					<span class="credits-theme">Theme <a href="https://github.com/zutrinken/attila">Attila</a> by zutrinken</a></span>
+				</section>
+			</div>
+		</footer>
+	</section>
+
+
+
+</body>
+
+
+</html>
